@@ -56,8 +56,8 @@ Invoice-Generator/
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/YOUR_USERNAME/Invoice-Generator.git
-cd Invoice-Generator
+git clone https://github.com/Abdullah6301/Voice-Invoice-Generator.git
+cd Voice-Invoice-Generator
 ```
 
 ### 2. Create Virtual Environment
