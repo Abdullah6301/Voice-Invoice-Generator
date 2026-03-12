@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice Generator - Invoices</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1>Invoice Generator</h1>
+                <p>AI-Powered Smart Invoicing</p>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="/"><span>Dashboard</span></a>
+                <a href="/customers-page"><span>Customers</span></a>
+                <a href="/invoices-page" class="active"><span>Invoices</span></a>
+                <a href="/dataset-page"><span>Items</span></a>
+                <div class="divider"></div>
+                <a href="/settings-page"><span>Settings</span></a>
+                <a href="/logout"><span>Logout</span></a>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <div class="page-header">
+                <h2>Invoice History</h2>
+                <a href="/" class="btn btn-primary">&#127908; Create with Voice</a>
+            </div>
+
+            <div class="card">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Invoice #</th>
+                            <th>Customer</th>
+                            <th>Location</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="invoicesBody">
+                        <tr><td colspan="7" class="loading"><div class="spinner"></div></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <!-- View Invoice Modal -->
+    <div class="modal-overlay" id="viewModal">
+        <div class="modal" style="max-width:650px">
+            <div id="viewModalContent"></div>
+            <div style="text-align:right;margin-top:16px">
+                <button class="btn btn-outline" onclick="closeModal('viewModal')">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Invoice Modal -->
+    <div class="modal-overlay" id="editModal">
+        <div class="modal" style="max-width:800px">
+            <h3 id="editModalTitle">Edit Invoice</h3>
+            <form id="editInvoiceForm" onsubmit="saveInvoiceEdits(event)">
+                <input type="hidden" id="editInvoiceId">
+                <div class="form-row" style="margin-bottom:16px">
+                    <div class="form-group">
+                        <label class="form-label">Customer</label>
+                        <select id="editCustomerId" class="form-input" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius);font-size:14px"></select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Project Location</label>
+                        <input type="text" id="editLocation" class="form-input">
+                    </div>
+                </div>
+                <div class="form-row" style="margin-bottom:16px">
+                    <div class="form-group">
+                        <label class="form-label">Payment Terms</label>
+                        <input type="text" id="editPaymentTerms" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Notes</label>
+                        <input type="text" id="editNotes" class="form-input">
+                    </div>
+                </div>
+
+                <h4 style="margin:16px 0 8px;color:var(--primary)">Line Items</h4>
+                <table class="data-table" style="font-size:13px">
+                    <thead>
+                        <tr>
+                            <th>Item Name</th>
+                            <th style="width:70px">Qty</th>
+                            <th style="width:70px">Unit</th>
+                            <th style="width:90px">Unit Price</th>
+                            <th style="width:90px">Total</th>
+                            <th style="width:60px">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="editItemsBody"></tbody>
+                </table>
+
+                <div style="margin-top:12px">
+                    <button type="button" class="btn btn-sm btn-outline" onclick="addEditRow()">+ Add Item</button>
+                </div>
+
+                <div id="editTotalDisplay" style="text-align:right;margin-top:12px;font-size:16px;font-weight:700;color:var(--primary)"></div>
+
+                <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:20px">
+                    <button type="button" class="btn btn-outline" onclick="closeModal('editModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', loadInvoices);
+    </script>
+</body>
+</html>

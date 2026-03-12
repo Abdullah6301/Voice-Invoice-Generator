@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice Generator - Create Account</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <style>
+        .auth-page{display:flex;min-height:100vh;align-items:center;justify-content:center;background:var(--bg)}
+        .auth-card{background:#fff;border-radius:12px;box-shadow:0 4px 24px rgba(0,0,0,0.08);padding:48px 40px;width:100%;max-width:420px}
+        .auth-card h2{text-align:center;color:var(--primary);margin-bottom:6px;font-size:26px}
+        .auth-card .subtitle{text-align:center;color:var(--text-light);margin-bottom:28px;font-size:14px}
+        .auth-card .form-group{margin-bottom:18px}
+        .auth-card .form-label{font-weight:600;margin-bottom:6px;display:block;font-size:13px}
+        .auth-card .form-input{width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:var(--radius);font-size:14px;box-sizing:border-box}
+        .auth-card .btn-primary{width:100%;padding:14px;font-size:15px;margin-top:8px}
+        .auth-card .auth-footer{text-align:center;margin-top:20px;font-size:13px;color:var(--text-light)}
+        .auth-card .auth-footer a{color:var(--primary);font-weight:600;text-decoration:none}
+        .auth-error{background:#fed7d7;color:#c53030;padding:10px 14px;border-radius:var(--radius);margin-bottom:16px;font-size:13px;display:none}
+        .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    </style>
+</head>
+<body>
+    <div class="auth-page">
+        <div class="auth-card">
+            <h2>Create Account</h2>
+            <p class="subtitle">Start generating professional invoices</p>
+            <div class="auth-error" id="signupError"></div>
+            <form onsubmit="handleSignup(event)">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Company Name *</label>
+                        <input type="text" id="signupCompany" class="form-input" placeholder="Your Company LLC" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Your Name *</label>
+                        <input type="text" id="signupName" class="form-input" placeholder="John Doe" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email *</label>
+                    <input type="email" id="signupEmail" class="form-input" placeholder="you@company.com" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Password *</label>
+                    <input type="password" id="signupPassword" class="form-input" placeholder="Min 6 characters" required minlength="6">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Confirm Password *</label>
+                    <input type="password" id="signupConfirm" class="form-input" placeholder="Repeat password" required minlength="6">
+                </div>
+                <button type="submit" class="btn btn-primary" id="signupBtn">Create Account</button>
+            </form>
+            <div class="auth-footer">
+                Already have an account? <a href="/login">Sign in</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function handleSignup(e) {
+            e.preventDefault();
+            const errEl = document.getElementById('signupError');
+            errEl.style.display = 'none';
+
+            const password = document.getElementById('signupPassword').value;
+            const confirm = document.getElementById('signupConfirm').value;
+            if (password !== confirm) {
+                errEl.textContent = 'Passwords do not match.';
+                errEl.style.display = 'block';
+                return;
+            }
+
+            const btn = document.getElementById('signupBtn');
+            btn.disabled = true;
+            btn.textContent = 'Creating account...';
+
+            try {
+                const resp = await fetch('/api/contractors/register', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        company_name: document.getElementById('signupCompany').value.trim(),
+                        owner_name: document.getElementById('signupName').value.trim(),
+                        email: document.getElementById('signupEmail').value.trim(),
+                        password: password,
+                    }),
+                });
+                const data = await resp.json();
+                if (!resp.ok) {
+                    throw new Error(data.detail || 'Registration failed');
+                }
+                // Auto-login after registration — server sets cookie
+                window.location.href = '/settings-page';
+            } catch (err) {
+                errEl.textContent = err.message;
+                errEl.style.display = 'block';
+                btn.disabled = false;
+                btn.textContent = 'Create Account';
+            }
+        }
+    </script>
+</body>
+</html>

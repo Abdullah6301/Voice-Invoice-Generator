@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice Generator - Items</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1>Invoice Generator</h1>
+                <p>AI-Powered Smart Invoicing</p>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="/"><span>Dashboard</span></a>
+                <a href="/customers-page"><span>Customers</span></a>
+                <a href="/invoices-page"><span>Invoices</span></a>
+                <a href="/dataset-page" class="active"><span>Items</span></a>
+                <div class="divider"></div>
+                <a href="/settings-page"><span>Settings</span></a>
+                <a href="/logout"><span>Logout</span></a>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <div class="page-header">
+                <h2>Construction Materials Items</h2>
+                <span class="badge" id="itemCount">0 items</span>
+            </div>
+
+            <div class="card">
+                <div class="filter-row" style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;align-items:center">
+                    <select id="categoryFilter" class="form-input" style="max-width:220px" onchange="loadDataset()">
+                        <option value="">All Categories</option>
+                    </select>
+                    <input type="text" id="datasetSearch" class="form-input" style="flex:1;min-width:200px"
+                           placeholder="Search materials..." oninput="debounceSearch()">
+                    <button class="btn btn-primary" onclick="openAddItemModal()">+ Add Item</button>
+                </div>
+
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>CSI Code</th>
+                            <th>Item Name</th>
+                            <th>Category</th>
+                            <th>Unit</th>
+                            <th>Material Cost</th>
+                            <th>Labor Cost</th>
+                            <th>Total Price</th>
+                            <th style="width:140px">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="datasetBody">
+                        <tr><td colspan="8" class="loading"><div class="spinner"></div></td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Add / Edit Dataset Item Modal -->
+            <div class="modal-overlay" id="datasetItemModal">
+                <div class="modal" style="max-width:550px">
+                    <h3 id="datasetModalTitle">Add Item</h3>
+                    <form id="datasetItemForm" onsubmit="saveDatasetItem(event)">
+                        <input type="hidden" id="dsItemId">
+                        <div class="form-row" style="margin-bottom:12px">
+                            <div class="form-group">
+                                <label class="form-label">Item Name *</label>
+                                <input type="text" id="dsItemName" class="form-input" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Category *</label>
+                                <input type="text" id="dsCategory" class="form-input" required>
+                            </div>
+                        </div>
+                        <div class="form-row" style="margin-bottom:12px">
+                            <div class="form-group">
+                                <label class="form-label">Unit *</label>
+                                <input type="text" id="dsUnit" class="form-input" required placeholder="each, sqft, linear_ft...">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">CSI Code</label>
+                                <input type="text" id="dsCsiCode" class="form-input" placeholder="e.g. 03 15 00">
+                            </div>
+                        </div>
+                        <div class="form-row" style="margin-bottom:12px">
+                            <div class="form-group">
+                                <label class="form-label">Material Cost ($)</label>
+                                <input type="number" id="dsMaterialCost" class="form-input" step="0.01" min="0" value="0">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Labor Cost ($)</label>
+                                <input type="number" id="dsLaborCost" class="form-input" step="0.01" min="0" value="0">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Total Price ($)</label>
+                                <input type="number" id="dsTotalPrice" class="form-input" step="0.01" min="0" value="0">
+                            </div>
+                        </div>
+                        <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:20px">
+                            <button type="button" class="btn btn-outline" onclick="closeModal('datasetItemModal')">Cancel</button>
+                            <button type="submit" class="btn btn-primary" id="dsSubmitBtn">Add Item</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+    <script>
+        let searchTimer = null;
+        function debounceSearch() {
+            clearTimeout(searchTimer);
+            searchTimer = setTimeout(loadDataset, 300);
+        }
+
+        async function loadCategories() {
+            try {
+                const cats = await apiCall('/dataset/categories');
+                const sel = document.getElementById('categoryFilter');
+                (cats.categories || []).forEach(c => {
+                    const opt = document.createElement('option');
+                    opt.value = c;
+                    opt.textContent = c;
+                    sel.appendChild(opt);
+                });
+            } catch(e) { console.error(e); }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadCategories();
+            loadDataset();
+        });
+    </script>
+</body>
+</html>

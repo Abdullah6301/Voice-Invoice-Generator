@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice Generator - Dashboard</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1>Invoice Generator</h1>
+                <p>AI-Powered Smart Invoicing</p>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="/" class="active"><span>Dashboard</span></a>
+                <a href="/customers-page"><span>Customers</span></a>
+                <a href="/invoices-page"><span>Invoices</span></a>
+                <a href="/dataset-page"><span>Items</span></a>
+                <div class="divider"></div>
+                <a href="/settings-page"><span>Settings</span></a>
+                <a href="/logout"><span>Logout</span></a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="page-header">
+                <h2>Dashboard</h2>
+                <span style="color:var(--text-light);font-size:13px">Offline-First Mode Active</span>
+            </div>
+
+            <!-- Voice Starter (Initial State - Big Mic) -->
+            <div id="voiceStarter" class="voice-starter">
+                <div class="voice-starter-inner">
+                    <button class="mic-hero" id="micHeroBtn" onclick="VoiceConversation.start()">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                            <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                            <line x1="12" y1="19" x2="12" y2="23"/>
+                            <line x1="8" y1="23" x2="16" y2="23"/>
+                        </svg>
+                    </button>
+                    <h3>Start Voice Invoice</h3>
+                    <p>Click the microphone to begin a voice conversation and create an invoice</p>
+                </div>
+            </div>
+
+            <!-- Voice Workspace (Active State - 3 Panel Layout, Hidden Initially) -->
+            <div id="voiceWorkspace" class="voice-workspace">
+                <!-- Panel 1: Conversation -->
+                <div class="ws-panel ws-conversation">
+                    <div class="ws-panel-header">
+                        <h4>&#128172; Conversation</h4>
+                        <div id="voiceIndicator" class="vi vi-processing">
+                            <span class="vi-dot"></span>
+                            <span id="voiceIndicatorText">Starting...</span>
+                        </div>
+                    </div>
+                    <div id="chatMessages" class="ws-chat"></div>
+                    <div class="ws-chat-input">
+                        <input type="text" id="wsTextInput" placeholder="Or type here..." onkeypress="if(event.key==='Enter')wsSendText()">
+                        <button class="btn btn-sm btn-accent" onclick="wsSendText()">Send</button>
+                    </div>
+                    <button class="ws-stop-btn" id="wsStopBtn" onclick="VoiceConversation.stop()">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>
+                        <span id="wsStopText">End Conversation</span>
+                    </button>
+                </div>
+
+                <!-- Panel 2: Live Invoice Preview -->
+                <div class="ws-panel ws-preview">
+                    <div class="ws-panel-header">
+                        <h4>&#128196; Invoice Preview</h4>
+                    </div>
+                    <div id="invoicePreview" class="ws-preview-content"></div>
+                </div>
+
+                <!-- Panel 3: Items Catalog -->
+                <div class="ws-panel ws-items">
+                    <div class="ws-panel-header">
+                        <h4>&#128218; Available Items</h4>
+                    </div>
+                    <input type="text" class="ws-items-search" id="wsItemsSearch" placeholder="Search items..." oninput="filterWorkspaceItems()">
+                    <div id="wsItemsList" class="ws-items-list">
+                        <div class="loading"><div class="spinner"></div></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="stats-grid" id="statsSection">
+                <div class="stat-card">
+                    <div class="stat-value" id="statInvoices">0</div>
+                    <div class="stat-label">Today's Invoices</div>
+                </div>
+                <div class="stat-card accent">
+                    <div class="stat-value" id="statTodayRevenue">$0.00</div>
+                    <div class="stat-label">Today's Revenue</div>
+                </div>
+                <div class="stat-card success">
+                    <div class="stat-value" id="statMonthRevenue">$0.00</div>
+                    <div class="stat-label">This Month's Revenue</div>
+                </div>
+                <div class="stat-card warning" style="cursor:pointer" onclick="window.location.href='/dataset-page'">
+                    <div class="stat-value" id="statDataset">0</div>
+                    <div class="stat-label">Items</div>
+                </div>
+            </div>
+
+            <!-- Recent Invoices -->
+            <div class="card" id="recentSection">
+                <div class="card-header">
+                    <h3>Recent Invoices</h3>
+                    <a href="/invoices-page" class="btn btn-sm btn-outline">View All</a>
+                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Invoice #</th>
+                            <th>Customer</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recentInvoicesBody">
+                        <tr><td colspan="5" class="empty-state">No invoices yet. Use voice commands to create one!</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', loadDashboardStats);
+    </script>
+</body>
+</html>

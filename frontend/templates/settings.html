@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice Generator - Settings</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1>Invoice Generator</h1>
+                <p>AI-Powered Smart Invoicing</p>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="/"><span>Dashboard</span></a>
+                <a href="/customers-page"><span>Customers</span></a>
+                <a href="/invoices-page"><span>Invoices</span></a>
+                <a href="/dataset-page"><span>Items</span></a>
+                <div class="divider"></div>
+                <a href="/settings-page" class="active"><span>Settings</span></a>
+                <a href="/logout"><span>Logout</span></a>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <div class="page-header">
+                <h2>Settings</h2>
+            </div>
+
+            <!-- Contractor Profile -->
+            <div class="card">
+                <h3 style="margin-bottom:16px">Contractor Profile</h3>
+                <form id="settingsForm" onsubmit="saveSettings(event)">
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+                        <div class="form-group">
+                            <label class="form-label" for="sCompany">Company Name</label>
+                            <input type="text" id="sCompany" class="form-input" placeholder="Your Company LLC">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="sName">Contact Name</label>
+                            <input type="text" id="sName" class="form-input" placeholder="John Doe">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="sEmail">Email</label>
+                            <input type="email" id="sEmail" class="form-input" placeholder="john@company.com">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="sPhone">Phone</label>
+                            <input type="tel" id="sPhone" class="form-input" placeholder="(555) 123-4567">
+                        </div>
+                        <div class="form-group" style="grid-column:1/-1">
+                            <label class="form-label" for="sAddress">Business Address</label>
+                            <input type="text" id="sAddress" class="form-input" placeholder="123 Main St, City, State">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="sLicense">License Number</label>
+                            <input type="text" id="sLicense" class="form-input" placeholder="LIC-12345">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="sSpecialty">Specialty</label>
+                            <input type="text" id="sSpecialty" class="form-input" placeholder="General Contractor">
+                        </div>
+                    </div>
+                    <div style="margin-top:20px;text-align:right">
+                        <button type="submit" class="btn btn-primary">Save Profile</button>
+                    </div>
+                </form>
+            </div>
+
+
+        </main>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+    <script>
+        async function saveSettings(e) {
+            e.preventDefault();
+            const data = {
+                company_name: document.getElementById('sCompany').value,
+                owner_name: document.getElementById('sName').value,
+                email: document.getElementById('sEmail').value,
+                phone: document.getElementById('sPhone').value,
+                address: document.getElementById('sAddress').value,
+                business_license: document.getElementById('sLicense').value,
+                specialty: document.getElementById('sSpecialty').value
+            };
+
+            try {
+                await apiCall(`/contractors/${CONTRACTOR_ID}`, 'PUT', data);
+                showToast('Profile saved successfully!', 'success');
+            } catch(err) {
+                showToast('Failed to save: ' + err.message, 'error');
+            }
+        }
+
+        async function loadProfile() {
+            await userReady;
+            try {
+                const resp = await apiCall(`/contractors/${CONTRACTOR_ID}`);
+                const c = resp.contractor;
+                if (c) {
+                    document.getElementById('sCompany').value = c.company_name || '';
+                    document.getElementById('sName').value = c.owner_name || '';
+                    document.getElementById('sEmail').value = c.email || '';
+                    document.getElementById('sPhone').value = c.phone || '';
+                    document.getElementById('sAddress').value = c.address || '';
+                    document.getElementById('sLicense').value = c.business_license || '';
+                    document.getElementById('sSpecialty').value = c.specialty || '';
+                }
+            } catch(e) { /* default admin may not have all fields */ }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadProfile);
+    </script>
+</body>
+</html>

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice Generator - Sign In</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <style>
+        .auth-page{display:flex;min-height:100vh;align-items:center;justify-content:center;background:var(--bg)}
+        .auth-card{background:#fff;border-radius:12px;box-shadow:0 4px 24px rgba(0,0,0,0.08);padding:48px 40px;width:100%;max-width:420px}
+        .auth-card h2{text-align:center;color:var(--primary);margin-bottom:6px;font-size:26px}
+        .auth-card .subtitle{text-align:center;color:var(--text-light);margin-bottom:28px;font-size:14px}
+        .auth-card .form-group{margin-bottom:18px}
+        .auth-card .form-label{font-weight:600;margin-bottom:6px;display:block;font-size:13px}
+        .auth-card .form-input{width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:var(--radius);font-size:14px;box-sizing:border-box}
+        .auth-card .btn-primary{width:100%;padding:14px;font-size:15px;margin-top:8px}
+        .auth-card .auth-footer{text-align:center;margin-top:20px;font-size:13px;color:var(--text-light)}
+        .auth-card .auth-footer a{color:var(--primary);font-weight:600;text-decoration:none}
+        .auth-error{background:#fed7d7;color:#c53030;padding:10px 14px;border-radius:var(--radius);margin-bottom:16px;font-size:13px;display:none}
+    </style>
+</head>
+<body>
+    <div class="auth-page">
+        <div class="auth-card">
+            <h2>Sign In</h2>
+            <p class="subtitle">Welcome back to Invoice Generator</p>
+            <div class="auth-error" id="loginError"></div>
+            <form onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" id="loginEmail" class="form-input" placeholder="you@company.com" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <input type="password" id="loginPassword" class="form-input" placeholder="Enter your password" required>
+                </div>
+                <button type="submit" class="btn btn-primary" id="loginBtn">Sign In</button>
+            </form>
+            <div class="auth-footer">
+                Don't have an account? <a href="/signup">Create one</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function handleLogin(e) {
+            e.preventDefault();
+            const errEl = document.getElementById('loginError');
+            errEl.style.display = 'none';
+            const btn = document.getElementById('loginBtn');
+            btn.disabled = true;
+            btn.textContent = 'Signing in...';
+
+            try {
+                const resp = await fetch('/api/contractors/login', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        email: document.getElementById('loginEmail').value.trim(),
+                        password: document.getElementById('loginPassword').value,
+                    }),
+                });
+                const data = await resp.json();
+                if (!resp.ok) {
+                    throw new Error(data.detail || 'Login failed');
+                }
+                // Server sets cookie; redirect to dashboard
+                window.location.href = '/';
+            } catch (err) {
+                errEl.textContent = err.message;
+                errEl.style.display = 'block';
+                btn.disabled = false;
+                btn.textContent = 'Sign In';
+            }
+        }
+    </script>
+</body>
+</html>
